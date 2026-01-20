@@ -37,7 +37,7 @@ jobs:
       - name: Run build script
         run: bun run build-static
         env:
-          HOST: gebeto.github.io/loe-blackouts-api
+          HOST: gebeto.github.io/lofv-schedule
 
       - name: Setup Pages
         uses: actions/configure-pages@v3
