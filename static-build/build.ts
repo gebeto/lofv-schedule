@@ -46,7 +46,7 @@ const buildStaticFiles = async () => {
       items: (Object.keys(availableParsers) as ParserKey[])
         .filter((c) => availableParsers[c]?.visible === true)
         .map((key) => ({
-          url: `webcal://${HOST}//${key}.ics`,
+          url: `webcal://${HOST}/${key}.ics`,
           title: availableParsers[key]?.label ?? key,
         })),
     }),
