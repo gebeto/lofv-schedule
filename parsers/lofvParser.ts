@@ -30,10 +30,13 @@ export class LOFVParser {
         row.querySelectorAll("td");
       const [dateStr, ...restTime] = datetime.textContent.trim().split(" ");
       const date = dayjs(dateStr, "DD-MM-YYYY").format("YYYY-MM-DD");
+      const teams = `${teamHome.textContent.trim()} - ${teamAway.textContent.trim()}`;
       return {
-        title: title.textContent.trim().replace(/:$/, ""),
+        title: teams,
         date: date,
-        details: `${teamHome.textContent.trim()} (${result.textContent.trim()}) ${teamAway.textContent.trim()}`,
+        details: `${title.textContent.trim().replace(/:$/, "")}
+
+${teamHome.textContent.trim()} (${result.textContent.trim()}) ${teamAway.textContent.trim()}`,
       };
     });
   }
