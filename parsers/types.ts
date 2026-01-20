@@ -11,14 +11,8 @@ dayjs.extend(dayjsTz);
 
 export { dayjs };
 
-export type BlackoutTimeRange = {
-  group: string;
-  start: string;
-  end: string;
-};
-
-export type BlackoutSchedule = {
-  allSlots: BlackoutTimeRange[];
-  allGroups: string[];
-  slotsForGroup: Record<string, BlackoutTimeRange[]>;
+export type GameSchedule = {
+  date: string;
+  title: string;
+  details: string;
 };

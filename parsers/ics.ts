@@ -1,45 +1,51 @@
 import { dayjs } from "../parsers";
 
 import * as ics from "ics";
-import { BlackoutTimeRange } from "./types";
+import { GameSchedule } from "./types";
 
-function createEventForGroup(timeRange: BlackoutTimeRange) {
-  const start = dayjs(timeRange.start)
-    .tz("Europe/Kyiv")
-    .format("YYYY-M-D-H-m")
+function createEventForGroup(schedule: GameSchedule) {
+  // const start = dayjs(schedule.date)
+  //   .tz("Europe/Kyiv")
+  //   .format("YYYY-M-D-H-m")
+  //   .split("-")
+  //   .map((a) => parseInt(a)) as ics.DateArray;
+  const startObj = dayjs(schedule.date, "YYYY-MM-DD");
+  const start = startObj
+    .format("YYYY-M-D")
     .split("-")
     .map((a) => parseInt(a)) as ics.DateArray;
-  const end = dayjs(timeRange.end)
-    .tz("Europe/Kyiv")
-    .format("YYYY-M-D-H-m")
+  const end = startObj
+    .add(1, "day")
+    .format("YYYY-M-D")
     .split("-")
     .map((a) => parseInt(a)) as ics.DateArray;
 
   const event: ics.EventAttributes = {
-    uid: timeRange.start + "-" + timeRange.end + "@" + "loe-blackouts",
+    uid: schedule.date + "@loe-blackouts",
     startOutputType: "local",
     start: start,
     end: end,
     busyStatus: "BUSY",
     transp: "TRANSPARENT",
-    title: `${timeRange.group} Відключення світла`,
-    alarms: [
-      {
-        action: "display",
-        description: "Відключення світла скоро почнеться",
-        trigger: { minutes: 30, before: true },
-        repeat: 1,
-        attach: "Glass",
-      },
-    ],
+    title: schedule.title.trim(),
+    description: schedule.details,
+    // alarms: [
+    //   {
+    //     action: "display",
+    //     description: "Відключення світла скоро почнеться",
+    //     trigger: { minutes: 30, before: true },
+    //     repeat: 1,
+    //     attach: "Glass",
+    //   },
+    // ],
   };
 
   return event;
 }
 
 export function generateIcs(
-  blackoutSchedule: BlackoutTimeRange[],
-  groupTitle?: string
+  blackoutSchedule: GameSchedule[],
+  groupTitle?: string,
 ): string {
   const events: ics.EventAttributes[] = [];
   blackoutSchedule.forEach((timeRange) => {
@@ -47,9 +53,7 @@ export function generateIcs(
   });
 
   const result = ics.createEvents(events, {
-    calName: groupTitle
-      ? `${groupTitle} Відключення світла`
-      : "Відключення світла",
+    calName: "Ігри",
   }).value;
 
   return result ?? "";

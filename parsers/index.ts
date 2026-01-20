@@ -1,15 +1,18 @@
 import { UnionToTuple } from "type-fest";
 
-import { parseLOEBlackoutsSchedule } from "./lviv";
+import { LOFVParser } from "./lofvParser";
 
 export { dayjs } from "./types";
 export { generateIcs } from "./ics";
 
 export const availableParsers = {
-  lviv: {
-    key: "lviv",
-    label: "Львів",
-    parser: parseLOEBlackoutsSchedule,
+  dublyany: {
+    key: "dublyany",
+    label: "ВК Дубляни",
+    parser: async () => {
+      const parser = new LOFVParser();
+      return await parser.parse();
+    },
     visible: true,
   },
 };

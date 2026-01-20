@@ -35,74 +35,32 @@ const buildStaticFiles = async () => {
   const indexTemplate = Handlebars.compile(
     await fs.readFile(path.join(__dirname, "index.handlebars"), "utf-8"),
   );
-  const groupsTemplate = Handlebars.compile(
-    await fs.readFile(path.join(__dirname, "groups.handlebars"), "utf-8"),
-  );
 
   const rootDir = path.resolve(__dirname, "..", "dist");
   await fs.rm(rootDir, { recursive: true, force: true });
   await fs.mkdir(rootDir, { recursive: true });
+
   await fs.writeFile(
     path.join(rootDir, "index.html"),
     indexTemplate({
-      cities: (Object.keys(availableParsers) as ParserKey[])
+      items: (Object.keys(availableParsers) as ParserKey[])
         .filter((c) => availableParsers[c]?.visible === true)
-        .map((city) => ({
-          key: city,
-          label: availableParsers[city]?.label ?? city,
+        .map((key) => ({
+          url: `webcal://${HOST}//${key}.ics`,
+          title: availableParsers[key]?.label ?? key,
         })),
     }),
     "utf-8",
   );
 
   for (const [parserKey, parser] of Object.entries(availableParsers)) {
-    const cityDirectory = path.join(rootDir, parserKey);
-    await fs.mkdir(cityDirectory, { recursive: true });
-
     const schedule = await parser.parser();
-    fs.writeFile(
-      path.join(cityDirectory, "schedule.json"),
-      JSON.stringify(
-        {
-          allGroups: schedule.allGroups,
-          slotsForGroup: schedule.slotsForGroup,
-        },
-        null,
-        2,
-      ),
-      "utf-8",
-    );
 
     fs.writeFile(
-      path.join(cityDirectory, "index.html"),
-      groupsTemplate({
-        title: parserKey,
-        slots: [
-          { title: "All", url: `webcal://${HOST}/${parserKey}/all.ics` },
-          ...schedule.allGroups.map((g) => {
-            return {
-              title: g,
-              url: `webcal://${HOST}/${parserKey}/${g}.ics`,
-            };
-          }),
-        ],
-      }),
+      path.join(rootDir, `${parserKey}.ics`),
+      generateIcs(schedule),
       "utf-8",
     );
-
-    fs.writeFile(
-      path.join(cityDirectory, `all.ics`),
-      generateIcs(schedule.allSlots),
-      "utf-8",
-    );
-
-    for (const group of schedule.allGroups) {
-      fs.writeFile(
-        path.join(cityDirectory, `${group}.ics`),
-        generateIcs(schedule.slotsForGroup[group] ?? [], group),
-        "utf-8",
-      );
-    }
   }
 };
 
