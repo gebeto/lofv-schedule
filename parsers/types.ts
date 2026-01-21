@@ -16,3 +16,9 @@ export type GameSchedule = {
   title: string;
   details: string;
 };
+
+export type LOFVTeam = {
+  key: string;
+  name: string;
+  link: string;
+};

@@ -2,6 +2,8 @@ import fs from "fs/promises";
 import path from "path";
 import { generateIcs, availableParsers, ParserKey } from "../parsers";
 import Handlebars from "handlebars";
+import { LOFVTeamsParser } from "../parsers/lofvTeamsParser";
+import { LOFVGamesParser } from "../parsers/lofvGamesParser";
 
 const HOST = process.env.HOST || "localhost:3000";
 
@@ -40,25 +42,28 @@ const buildStaticFiles = async () => {
   await fs.rm(rootDir, { recursive: true, force: true });
   await fs.mkdir(rootDir, { recursive: true });
 
+  const teamsParser = new LOFVTeamsParser();
+  const teams = await teamsParser.parse();
+
   await fs.writeFile(
     path.join(rootDir, "index.html"),
     indexTemplate({
-      items: (Object.keys(availableParsers) as ParserKey[])
-        .filter((c) => availableParsers[c]?.visible === true)
-        .map((key) => ({
-          url: `webcal://${HOST}/${key}.ics`,
-          title: availableParsers[key]?.label ?? key,
-        })),
+      items: teams.map((team) => ({
+        url: `webcal://${HOST}/${team.key}.ics`,
+        title: team.name,
+        // url: team.link,
+      })),
     }),
     "utf-8",
   );
 
-  for (const [parserKey, parser] of Object.entries(availableParsers)) {
-    const schedule = await parser.parser();
+  const gamesParser = new LOFVGamesParser();
+  for (const team of teams) {
+    const schedule = await gamesParser.parse(team.link);
 
     fs.writeFile(
-      path.join(rootDir, `${parserKey}.ics`),
-      generateIcs(schedule),
+      path.join(rootDir, `${team.key}.ics`),
+      generateIcs(schedule, team.name),
       "utf-8",
     );
   }

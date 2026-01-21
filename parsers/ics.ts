@@ -44,16 +44,16 @@ function createEventForGroup(schedule: GameSchedule) {
 }
 
 export function generateIcs(
-  blackoutSchedule: GameSchedule[],
-  groupTitle?: string,
+  gamesSchedule: GameSchedule[],
+  title: string,
 ): string {
   const events: ics.EventAttributes[] = [];
-  blackoutSchedule.forEach((timeRange) => {
+  gamesSchedule.forEach((timeRange) => {
     events.push(createEventForGroup(timeRange));
   });
 
   const result = ics.createEvents(events, {
-    calName: "Ігри",
+    calName: title,
   }).value;
 
   return result ?? "";

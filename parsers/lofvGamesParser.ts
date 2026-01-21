@@ -1,18 +1,20 @@
 import { parse } from "node-html-parser";
 import { dayjs, GameSchedule } from "./types";
 
-export class LOFVParser {
-  async parse(): Promise<GameSchedule[]> {
-    const content = await this.fetchTeamData("22|0/84");
+export class LOFVGamesParser {
+  async parse(teamUrl: string): Promise<GameSchedule[]> {
+    const content = await this.fetchTeamData(teamUrl);
     const schedule = this.parseHtmlDataToObject(content);
 
     return schedule;
   }
 
-  async fetchTeamData(teamId: string) {
-    const response = await fetch(
-      `https://lofv.com.ua/component/joomsport/team/${teamId}`,
-    );
+  async fetchTeamData(teamUrl: string) {
+    // "22|0/84";
+    // const response = await fetch(
+    //   `https://lofv.com.ua/component/joomsport/team/${teamId}`,
+    // );
+    const response = await fetch(teamUrl);
     const responseData = await response.text();
     console.log(" >>> response:", JSON.stringify(responseData, undefined, 2));
 
@@ -26,9 +28,9 @@ export class LOFVParser {
     ];
 
     return parsedRows.map((row) => {
-      const [title, datetime, teamHome, result, teamAway, ...rest] =
+      const [title, datetime, teamHome, result, teamAway, ..._rest] =
         row.querySelectorAll("td");
-      const [dateStr, ...restTime] = datetime.textContent.trim().split(" ");
+      const [dateStr, ..._restTime] = datetime.textContent.trim().split(" ");
       const date = dayjs(dateStr, "DD-MM-YYYY").format("YYYY-MM-DD");
       const teams = `${teamHome.textContent.trim()} - ${teamAway.textContent.trim()}`;
       return {

@@ -1,6 +1,6 @@
 import { UnionToTuple } from "type-fest";
 
-import { LOFVParser } from "./lofvParser";
+import { LOFVGamesParser } from "./lofvGamesParser";
 
 export { dayjs } from "./types";
 export { generateIcs } from "./ics";
@@ -10,7 +10,7 @@ export const availableParsers = {
     key: "dublyany",
     label: "ВК Дубляни",
     parser: async () => {
-      const parser = new LOFVParser();
+      const parser = new LOFVGamesParser();
       return await parser.parse();
     },
     visible: true,
